@@ -1,0 +1,301 @@
+index.html
+#include <stdio.h>
+    #include <stdlib.h>
+    
+    
+    typedef struct Node {
+        int data;       
+        struct Node* next; 
+        struct Node* prev; 
+    } Node;
+    
+    
+    Node* getNext(Node* node) {
+        return node->next; 
+    }
+    
+    void setNext(Node* node, Node* next) {
+        node->next = next; 
+    }
+    
+    Node* getPrev(Node* node) {
+        return node->prev; 
+    }
+    
+    void setPrev(Node* node, Node* prev) {
+        node->prev = prev; 
+    }
+    
+    
+    void reverseDoublyLinkedList(Node** head) {
+        Node* prev = NULL;      
+        Node* current = *head; 
+        Node* next = NULL;      
+    
+        while (current != NULL) {
+            next = getNext(current);     
+            setNext(current, prev);      
+            setPrev(current, next);      
+            prev = current;              
+            current = next;              
+        }
+    
+        
+        *head = prev;
+    }
+    
+    
+    void initialization(Node** head, int n) {
+        Node* temp = NULL;
+        Node* tail = NULL;
+    
+        for (int i = 0; i < n; i++) {
+            Node* newNode = (Node*)malloc(sizeof(Node));
+            printf("أدخل قيمة العنصر %d: ", i + 1);
+            scanf("%d", &newNode->data);
+    
+            newNode->next = NULL;
+            newNode->prev = NULL;
+    
+            if (*head == NULL) {
+                *head = newNode; 
+                tail = newNode;  
+            } else {
+                tail->next = newNode; 
+                newNode->prev = tail; 
+                tail = newNode;       
+            }
+        }
+    }
+    
+    
+    void printList(Node* head) {
+        while (head != NULL) {
+            printf("%d ", head->data);
+            head = head->next;
+        }
+        printf("\n");
+    }
+    
+    
+    int main() {
+        Node* head = NULL;
+        int n;
+    
+        
+        printf("أدخل عدد عناصر القائمة: ");
+        scanf("%d", &n);
+    
+        initialization(&head, n);
+    
+        printf("القائمة الأصلية: ");
+        printList(head);
+    
+        
+        reverseDoublyLinkedList(&head);
+    
+        printf("القائمة بعد العكس: ");
+        printList(head);
+    
+        
+        Node* temp;
+        while (head != NULL) {
+            temp = head;
+            head = head->next;
+            free(temp);
+        }
+    
+        return 0;
+    }
+#include <stdio.h>
+    #include <stdlib.h>
+    
+    typedef struct Node {
+        int data;
+        struct Node* next;
+    } Node;
+    
+    
+    Node* createNode(int value) {
+        Node* newNode = (Node*)malloc(sizeof(Node));
+        newNode->data = value;
+        newNode->next = NULL;
+        return newNode;
+    }
+    
+    
+    Node* insertAtPosition(Node* head, int value, int k) {
+        Node* newNode = createNode(value);
+    
+        
+        if (k == 0) {
+            newNode->next = head;
+            return newNode;
+        }
+    
+        Node* current = head;
+        int count = 0;
+    
+        
+        while (current != NULL && count < k - 1) {
+            current = current->next;
+            count++;
+        }
+    
+        
+        if (current == NULL) {
+            printf("Error: Position %d is out of bounds.\n", k);
+            free(newNode); 
+            return head;
+        }
+    
+        
+        newNode->next = current->next;
+        current->next = newNode;
+    
+        return head;
+    }
+    
+    
+    void printList(Node* head) {
+        Node* current = head;
+        while (current != NULL) {
+            printf("%d -> ", current->data);
+            current = current->next;
+        }
+        printf("NULL\n");
+    }
+    
+    
+    int main() {
+        Node* head = NULL;
+    
+        
+        head = insertAtPosition(head, 10, 0);
+        head = insertAtPosition(head, 20, 1); 
+        head = insertAtPosition(head, 15, 1);
+        head = insertAtPosition(head, 25, 10); 
+    
+        printList(head); 
+    
+        return 0;
+    }
+#include <stdio.h>
+    #include <stdlib.h>
+    #include <string.h>
+    
+    #define MAX 100
+    
+    
+    typedef struct {
+        int arr[MAX];
+        int top;
+    } Stack;
+    
+    
+    void init_stack(Stack* stack) {
+        stack->top = -1;
+    }
+    
+    
+    void push(Stack* stack, int value) {
+        if (stack->top < MAX - 1) {
+            stack->arr[++(stack->top)] = value;
+        }
+    }
+    
+    
+    int pop(Stack* stack) {
+        return stack->arr[(stack->top)--];
+    }
+    
+    
+    int peek(Stack* stack) {
+        return stack->arr[stack->top];
+    }
+    
+    
+    int empty(Stack* stack) {
+        return stack->top == -1;
+    }
+    
+    
+    int precedence(char op) {
+        if (op == '+'  op == '-') return 1;
+        if (op == '*'  op == '/') return 2;
+        return 0;
+    }
+    
+    
+    void infix_to_postfix(char* infix, char* postfix) {
+        Stack stack;
+        init_stack(&stack);
+        int j = 0;
+    
+        for (int i = 0; i < strlen(infix); i++) {
+            char c = infix[i];
+    
+            
+            if (c >= '0' && c <= '9') {
+                postfix[j++] = c;  
+            } else if (c == '(') {
+                push(&stack, c);  
+            } else if (c == ')') {
+                while (!empty(&stack) && peek(&stack) != '(') {
+                    postfix[j++] = pop(&stack);  
+                }
+                pop(&stack);  
+            } else {  
+                while (!empty(&stack) && precedence(peek(&stack)) >= precedence(c)) {
+                    postfix[j++] = pop(&stack);  
+                }
+                push(&stack, c);  
+            }
+        }
+    
+        
+        while (!empty(&stack)) {
+            postfix[j++] = pop(&stack);
+        }
+        postfix[j] = '\0';  
+    }
+    
+    
+    int evaluate_postfix(char* postfix) {
+        Stack stack;
+        init_stack(&stack);
+    
+        for (int i = 0; i < strlen(postfix); i++) {
+            char c = postfix[i];
+    
+            
+            if (c >= '0' && c <= '9') {
+                push(&stack, c - '0');  
+            } else {  
+                int b = pop(&stack);
+                int a = pop(&stack);
+                switch (c) {
+                    case '+': push(&stack, a + b); break;
+                    case '-': push(&stack, a - b); break;
+                    case '*': push(&stack, a * b); break;
+                    case '/': push(&stack, a / b); break;
+                }
+            }
+        }
+        return pop(&stack);  
+    }
+    
+    int main() {
+        char infix[MAX], postfix[MAX];
+    
+        printf("أدخل تعبير infix: ");
+        scanf("%s", infix);
+    
+        infix_to_postfix(infix, postfix);
+        printf("التعبير postfix هو: %s\n", postfix);
+    
+        int result = evaluate_postfix(postfix);
+        printf("نتيجة التعبير هي: %d\n", result);
+    
+        return 0;
+    }
